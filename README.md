@@ -1,4 +1,4 @@
-# mad_assignment_02
+# Flutter Quiz App
 
 A new Flutter project.
 
