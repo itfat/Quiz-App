@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../custom_bottom.dart';
+import '../../size_config.dart';
 import 'components/body.dart';
 
 class ResultScreen extends StatelessWidget {
@@ -11,6 +13,9 @@ static String routeName = "/result";
         title: Text("Result"),
       ),
       body: Body(),  
+       bottomSheet: SizedBox(height:getProportionateScreenHeight(90),
+     
+      child: CustomBottom()),
     );
   }
 }

@@ -1,9 +1,15 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import '../../../constants.dart';
 import '../../../custom_surfix_icon.dart';
 import '../../../have_account.dart';
 import '../../../size_config.dart';
 import '../../../custom_surfix_icon.dart';
+import '../../home/home_screen.dart';
+import '../../../form_error.dart';
+import '../../../constants.dart';
+import '../../../size_config.dart';
 // import '/helper/keyboard.dart';
 
 class SignUpForm extends StatefulWidget {
@@ -16,6 +22,7 @@ class _SignUpFormState extends State<SignUpForm> {
   late String email;
   late String password;
   late String errorText;
+  late String conform_password;
 
   bool circular = false;
   bool remember = false;
@@ -28,69 +35,54 @@ class _SignUpFormState extends State<SignUpForm> {
     // autoSignUp();
   }
 
-  // void addError({String error}) {
-  //   if (!errors.contains(error))
-  //     setState(() {
-  //       errors.add(error);
-  //     });
-  // }
+  void addError({required String error}) {
+    if (!errors.contains(error))
+      setState(() {
+        errors.add(error);
+      });
+  }
 
-  // void removeError({String error}) {
-  //   if (errors.contains(error))
-  //     setState(() {
-  //       errors.remove(error);
-  //     });
-  // }
+  void removeError({required String error}) {
+    if (errors.contains(error))
+      setState(() {
+        errors.remove(error);
+      });
+  }
 
-  // void autoSignUp() async {
-  //   final SharedPreferences access = await SharedPreferences.getInstance();
-  //   globals.token = access.getString('token');
-
-  //   if (access.getString('token') != null) {
-  //     Navigator.pushReplacementNamed(context, HomeScreen.routeName);
-  //     setState(() {
-  //       globals.validate = true;
-  //     });
-  //   }
-  // }
-
-  // Future<Null> SignUpUser() async {
-  //   final SharedPreferences access = await SharedPreferences.getInstance();
-  //   await AuthService().SignUp(email, password).then((value) {
-  //     // if (value.data['access_token'] != null) {
-  //     //   setState(() {
-  //     //     globals.validate = true;
-  //     //   });
-  //       globals.token = value.data['access_token'];
-  //       access.setString('token', globals.token);
-  //       Navigator.pushReplacementNamed(context, SignUpSuccessScreen.routeName);
-  //     // }
-
-  //   });
-  // }
+  signUp() async {
+    await Firebase.initializeApp();
+    try {
+      UserCredential userCredential = await FirebaseAuth.instance
+          .createUserWithEmailAndPassword(email: email, password: password);
+      Navigator.pushReplacementNamed(context, HomeScreen.routeName);
+    } on FirebaseAuthException catch (e) {
+      print('No user found for that email.');
+      print(e);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Form(
-      // key: _formKey,
+      key: _formKey,
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Column(
           children: [
-            
-             buildEmailFormField(),
-        
+            buildEmailFormField(),
+
             SizedBox(height: getProportionateScreenHeight(20)),
-           buildPasswordFormField(),
-       
+            buildPasswordFormField(),
+
             SizedBox(height: getProportionateScreenHeight(20)),
             // FormError(errors: errors),
-             confirmPasswordFormField(),
-       
+            confirmPasswordFormField(),
+
             SizedBox(height: getProportionateScreenHeight(20)),
-            
+
             ElevatedButton(
               onPressed: () {
+                signUp();
                 // Navigator.pushReplacementNamed(context, SignUpScreen.routeName);
               },
               child: Text(
@@ -133,25 +125,25 @@ class _SignUpFormState extends State<SignUpForm> {
   TextFormField buildPasswordFormField() {
     return TextFormField(
       obscureText: true,
-      // onSaved: (newValue) => password = newValue,
+      onSaved: (newValue) => password = newValue!,
       onChanged: (value) {
-        // if (value.isNotEmpty) {
-        //   removeError(error: kPassNullError);
-        // } else if (value.length >= 8) {
-        //   removeError(error: kShortPassError);
-        // }
-        // password = value;
+        if (value.isNotEmpty) {
+          removeError(error: kPassNullError);
+        } else if (value.length <= 8) {
+          removeError(error: kShortPassError);
+        }
+        password = value;
 
         return null;
       },
       validator: (value) {
-        // if (value.isEmpty) {
-        //   addError(error: kPassNullError);
-        //   return "";
-        // } else if (value.length < 8) {
-        //   addError(error: kShortPassError);
-        //   return "";
-        // }
+        if (value!.isEmpty) {
+          addError(error: kPassNullError);
+          return "";
+        } else if (value.length < 8) {
+          addError(error: kShortPassError);
+          return "";
+        }
         return null;
       },
       decoration: InputDecoration(
@@ -166,39 +158,37 @@ class _SignUpFormState extends State<SignUpForm> {
       ),
     );
   }
+
   TextFormField confirmPasswordFormField() {
     return TextFormField(
       obscureText: true,
-      // onSaved: (newValue) => password = newValue,
+      onSaved: (newValue) => conform_password = newValue!,
       onChanged: (value) {
-        // if (value.isNotEmpty) {
-        //   removeError(error: kPassNullError);
-        // } else if (value.length >= 8) {
-        //   removeError(error: kShortPassError);
-        // }
-        // password = value;
-
-        return null;
+        if (value.isNotEmpty) {
+          removeError(error: kPassNullError);
+        } else if (value.isNotEmpty && password != conform_password) {
+          removeError(error: kMatchPassError);
+        }
+        conform_password = value;
       },
       validator: (value) {
-        // if (value.isEmpty) {
-        //   addError(error: kPassNullError);
-        //   return "";
-        // } else if (value.length < 8) {
-        //   addError(error: kShortPassError);
-        //   return "";
-        // }
+        if (value!.isEmpty) {
+          addError(error: kPassNullError);
+          return "";
+        } else if ((password != value)) {
+          addError(error: kMatchPassError);
+          return "";
+        }
         return null;
       },
       decoration: InputDecoration(
-        hintText: "Confirm Password",
-        hintStyle: TextStyle(color: kSecondaryColor),
-        filled: true,
-        fillColor: Colors.white,
+        labelText: "Confirm Password",
+        focusColor: kdefinedColor,
+        hintText: "Re-enter your password",
         // If  you are using latest version of flutter then lable text and hint text shown like this
         // if you r using flutter less then 1.20.* then maybe this is not working properly
         floatingLabelBehavior: FloatingLabelBehavior.always,
-        suffixIcon: CustomSurffixIcon(svgIcon: "assets/icons/Lock.svg"),
+        // suffixIcon: CustomSurffixIcon(svgIcon: "assets/icons/Lock.svg"),
       ),
     );
   }
@@ -206,25 +196,25 @@ class _SignUpFormState extends State<SignUpForm> {
   TextFormField buildEmailFormField() {
     return TextFormField(
       keyboardType: TextInputType.emailAddress,
-      // onSaved: (newValue) => email = newValue,
+      onSaved: (newValue) => email = newValue!,
       onChanged: (value) {
-        // if (value.isNotEmpty) {
-        //   removeError(error: kEmailNullError);
-        // } else if (emailValidatorRegExp.hasMatch(value)) {
-        //   removeError(error: kInvalidEmailError);
-        // }
-        // email = value;
+        if (value.isNotEmpty) {
+          removeError(error: kEmailNullError);
+        } else if (emailValidatorRegExp.hasMatch(value)) {
+          removeError(error: kInvalidEmailError);
+        }
+        email = value;
         print(email);
         return null;
       },
       validator: (value) {
-        // if (value.isEmpty) {
-        //   addError(error: kEmailNullError);
-        //   return "";
-        // } else if (!emailValidatorRegExp.hasMatch(value)) {
-        //   addError(error: kInvalidEmailError);
-        //   return "";
-        // }
+        if (value!.isEmpty) {
+          addError(error: kEmailNullError);
+          return "";
+        } else if (!emailValidatorRegExp.hasMatch(value)) {
+          addError(error: kInvalidEmailError);
+          return "";
+        }
         return null;
       },
       decoration: InputDecoration(

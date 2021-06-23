@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
+import '../../../globals.dart';
 import '../../../screens/result/result_screen.dart';
 
 import '../../../constants.dart';
+import '../../../size_config.dart';
 
 class Check extends StatefulWidget {
   const Check({Key? key}) : super(key: key);
@@ -13,17 +14,30 @@ class Check extends StatefulWidget {
 }
 
 class _CheckState extends State<Check> {
-  int selectedRadio = 0;
+  List<int> selectedRadio = [0,0];
 
   @override
   void initState() {
     super.initState();
   }
 
-  setSelectedRadio(int val) {
+  setSelectedRadio(int val, int index) {
     setState(() {
-      selectedRadio = val;
+      selectedRadio[index] = val;
     });
+  }
+  scoreComputing( AsyncSnapshot<DocumentSnapshot> snapshot){
+      int counter = 0;
+      total = snapshot.data!.data().length;
+    for(int i=1; i<=snapshot.data!.data().length; i++){
+      // print()
+      if(snapshot.data!.data()["questions"]["question $i"]["answer"]==selectedRadio[i-1])
+      {
+        counter++;
+      }
+    }
+    return counter;
+
   }
 
   @override
@@ -45,54 +59,60 @@ class _CheckState extends State<Check> {
                     for (int i = 1; i <= snapshot.data!.data().length; i++)
                       Column(
                         children: [
+                          SizedBox(height: getProportionateScreenHeight(20)),
                           Text("Q#$i: " +
                               snapshot.data!.data()["questions"]["question $i"]
                                   ["description"]),
                           new RadioListTile<int>(
                             value: 1,
-                            groupValue: selectedRadio,
+                            groupValue: selectedRadio[i-1],
                             onChanged: (val) {
                               print("Value");
                               print(val.runtimeType);
 
-                              setSelectedRadio(val!);
+                              setSelectedRadio(val!, i-1);
                             },
                             title: new Text(snapshot.data!.data()["questions"]
                                 ["question $i"]["option 1"]),
                           ),
                           new RadioListTile<int>(
-                            groupValue: selectedRadio,
+                            groupValue: selectedRadio[i-1],
                             onChanged: (val) {
-                              setSelectedRadio(val!);
+                              setSelectedRadio(val!, i-1);
                             },
                             title: new Text(snapshot.data!.data()["questions"]
                                 ["question $i"]["option 2"]),
                             value: 2,
                           ),
                           new RadioListTile<int>(
-                            groupValue: selectedRadio,
+                            groupValue: selectedRadio[i-1],
                             onChanged: (value) {
-                              setSelectedRadio(value!);
+                              setSelectedRadio(value!, i-1);
                             },
                             title: new Text(snapshot.data!.data()["questions"]
                                 ["question $i"]["option 3"]),
                             value: 3,
                           ),
                           new RadioListTile<int>(
-                            groupValue: selectedRadio,
+                            groupValue: selectedRadio[i-1],
                             onChanged: (value) {
-                              setSelectedRadio(value!);
+                              setSelectedRadio(value!, i-1);
                             },
                             title: new Text(snapshot.data!.data()["questions"]
                                 ["question $i"]["option 4"]),
                             value: 4,
                           ),
+                        
+                          
                         ],
+                      
                       ),
+                    
                     ElevatedButton(
                       onPressed: () {
+                        score = scoreComputing(snapshot);
                         Navigator.pushReplacementNamed(
-                            context, ResultScreen.routeName);
+                            context, ResultScreen.routeName,  );
                       },
                       child: Text(
                         'Submit',
