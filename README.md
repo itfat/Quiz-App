@@ -1,3 +1,6 @@
+
+
+
 # Flutter Quiz App
 
 A new Flutter project.
@@ -15,5 +18,9 @@ For help getting started with Flutter, view our
 [online documentation](https://flutter.dev/docs), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
 
-Here are some demo videos of this app.
-https://github.com/itfat/Quiz-App/blob/master/Screenrecorder-2021-06-23-11-06-33-31.mp4
+
+https://user-images.githubusercontent.com/44062322/124718775-dfffde00-df1f-11eb-9086-6edf000c784e.mp4
+
+https://user-images.githubusercontent.com/44062322/124718813-edb56380-df1f-11eb-80a0-368841cc1f25.mp4
+
+
